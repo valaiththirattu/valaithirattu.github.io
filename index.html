@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trending Topics</title>
+    <style>
+        /* Add CSS styles for your cards */
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .card {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            width: 300px;
+            display: inline-block;
+        }
+        .card img {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Trending Topics</h1>
+    <div id="cardContainer">
+        <!-- Initial 10 cards will be displayed here -->
+    </div>
+
+    <script>
+        let currentPage = 1; // Track the current page of loaded data
+        const cardsPerPage = 10; // Number of cards to load per page
+        let isLoading = false; // To prevent multiple simultaneous requests
+
+        async function fetchData(page) {
+            try {
+                isLoading = true;
+                const response = await fetch(`https://your-api-url.com?page=${page}&per_page=${cardsPerPage}`);
+                const data = await response.json();
+                isLoading = false;
+                return data;
+            } catch (error) {
+                isLoading = false;
+                console.error('Error fetching data:', error);
+                return [];
+            }
+        }
+
+        async function displayCards() {
+            const cardContainer = document.getElementById('cardContainer');
+            const data = await fetchData(currentPage);
+
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.innerHTML = `
+                    <h2>${item.title}</h2>
+                    <img src="${item.image}" alt="${item.title}">
+                    <p>Category: ${item.category}</p>
+                    <p>Published Time: ${item.publishedTime}</p>
+                `;
+                cardContainer.appendChild(card);
+            });
+
+            currentPage++; // Increment the page for the next request
+        }
+
+        // Function to load more cards when user scrolls to the bottom
+        window.addEventListener('scroll', () => {
+            if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 100 && !isLoading) {
+                displayCards();
+            }
+        });
+
+        // Initial load of cards
+        displayCards();
+    </script>
+</body>
+</html>
